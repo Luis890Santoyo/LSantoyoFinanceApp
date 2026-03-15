@@ -4,22 +4,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lsantoyofinanceapp.ui.theme.LSantoyoFinanceAppTheme
+import kotlin.math.abs
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,23 +39,38 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun HomeScreen() {
+    val transactions = listOf(
+        Transaction(1, "Supermarket", "Groceries", 45.99, "10:30 AM", Icons.Default.ShoppingCart),
+        Transaction(2, "Gas Station", "Fuel", -30.5, "12:15 PM", Icons.Default.Place),
+        Transaction(3, "Coffee Shop", "Food & Drinks", 5.75, "8:00 AM", Icons.Default.Face), 
+        Transaction(4, "Electronics Store", "Electronics", 120.0, "3:45 PM", Icons.Default.Settings), 
+        Transaction(5, "Bookstore", "Books", 25.99, "2:00 PM", Icons.Default.ShoppingCart), 
+        Transaction(6, "Restaurant", "Dining", 60.0, "7:30 PM", Icons.Default.CheckCircle) 
+    )
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = Color.White
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
-                .padding(16.dp)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(16.dp)
         ) {
-            HeaderSection(name = "Juan")
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            SummarySection()
-            
-            // Siguiente paso: Lista de Transacciones
+            item {
+                HeaderSection(name = "Juan")
+                Spacer(modifier = Modifier.height(16.dp))
+                SummarySection()
+                Spacer(modifier = Modifier.height(24.dp))
+                TransactionHeader()
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            items(transactions) { transaction ->
+                TransactionItem(transaction)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
         }
     }
 }
@@ -87,7 +106,7 @@ fun HeaderSection(name: String) {
             )
         }
         
-        IconButton(onClick = { /* Acción del menú */ }) {
+        IconButton(onClick = { }) {
             Icon(
                 imageVector = Icons.Default.Menu,
                 contentDescription = "Menú",
@@ -105,13 +124,12 @@ fun SummarySection() {
             .height(200.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Tarjeta Grande: Actividad
         Card(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5F1)) // Verde claro
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5F1))
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -138,20 +156,18 @@ fun SummarySection() {
             }
         }
 
-        // Columna de tarjetas pequeñas
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Tarjeta Ventas
             Card(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF6E8DF)) // Durazno claro
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF6E8DF))
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -168,13 +184,12 @@ fun SummarySection() {
                 }
             }
 
-            // Tarjeta Ganancias
             Card(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8EAF6)) // Lavanda claro
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8EAF6))
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -190,6 +205,83 @@ fun SummarySection() {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun TransactionHeader() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Transactions",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+        Text(
+            text = "See All",
+            fontSize = 14.sp,
+            color = Color.Gray
+        )
+    }
+}
+
+@Composable
+fun TransactionItem(transaction: Transaction) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFF8F9FA), RoundedCornerShape(16.dp))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = transaction.icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(12.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = transaction.establishment,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Text(
+                text = transaction.category,
+                fontSize = 12.sp,
+                color = Color.Gray
+            )
+        }
+        
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = if (transaction.amount >= 0) "$${transaction.amount}" else "$-${abs(transaction.amount)}",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Text(
+                text = transaction.time,
+                fontSize = 12.sp,
+                color = Color.Gray
+            )
         }
     }
 }
